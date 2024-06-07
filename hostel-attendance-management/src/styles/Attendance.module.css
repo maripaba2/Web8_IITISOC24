@@ -1,0 +1,92 @@
+.content {
+  padding: 2rem;
+  text-align: center;
+  color: #fff;
+  font-family: 'Poppins';
+  height: 100vh;
+}
+
+.content h1 {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  animation: fadeInDown 1s ease;
+}
+
+.attendanceTable {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+  margin: 0 auto;
+  width: 80%;
+  max-width: 1000px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 1rem;
+  animation: fadeInUp 1s ease;
+}
+
+.attendanceTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attendanceTable th, .attendanceTable td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #fff;
+  font-size: 1.2rem;
+  color: #1e90ff;
+}
+
+.attendanceTable th {
+  background: #1e90ff;
+  color: #fff;
+  font-weight: bold;
+}
+
+.attendanceTable tbody tr:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.3s ease;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.mainMenu {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.menuIcon {
+  width: 60px; 
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.menuIcon:hover {
+  transform: scale(1.1);
+}

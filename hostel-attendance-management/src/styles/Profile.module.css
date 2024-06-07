@@ -1,0 +1,91 @@
+.profileContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.mainMenu {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.menuIcon {
+  width: 60px; 
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.menuIcon:hover {
+  transform: scale(1.1);
+}
+
+.profileCard {
+  background: #383838;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px #1e90ff;
+  padding: 10px;
+  text-align: center;
+  max-width: 80%;
+  width: 100%;
+  height: 85%;
+  animation: slideInFromBottom 1s ease-in-out;
+}
+
+.profilePhoto {
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  margin-bottom: 20px;
+  animation: zoomIn 0.6s ease-in-out;
+}
+
+.profileDetails h2 {
+  margin: 10px 0;
+  color: #2877d6;
+}
+
+.profileDetails p {
+  margin: 5px 0;
+  color: #ebe4e4;
+  text-align: center;
+}
+
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+  }
+  to {
+      opacity: 1;
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+      transform: translateY(50px);
+      opacity: 0;
+  }
+  to {
+      transform: translateY(0);
+      opacity: 1;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+      transform: scale(4);
+      opacity: 0;
+  }
+  to {
+      transform: scale(1);
+      opacity: 1;
+  }
+}

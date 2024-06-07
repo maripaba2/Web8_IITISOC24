@@ -1,0 +1,28 @@
+body {
+  background-color: #141414;
+  margin: 0;
+  font-family: 'Poppins', 'Roboto', sans-serif;
+  color: #fff;
+}
+
+.logo-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+}
+
+.institute-logo {
+  width: 100px;
+  height: auto;
+  transition: transform 0.3s ease;
+}
+
+.institute-logo:hover {
+  transform: scale(1.1);
+}
+
+/* Additional global styles */
+body {
+  transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+}
