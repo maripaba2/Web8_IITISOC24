@@ -1,39 +1,38 @@
+// utils/sendNotification.js
 import nodemailer from 'nodemailer';
+import connectToDatabase from './database';
 import Attendance from '../models/Attendance';
-import connectDB from './database';
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USERNAME,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+export async function sendDailyReminders() {
+  await connectToDatabase();
 
-const sendLateNotification = async () => {
-  await connectDB();
+  const users = await User.find();
+  const currentDate = new Date().toISOString().slice(0, 10);
 
-  const now = new Date();
-  now.setHours(23, 0, 0, 0);
+  for (const user of users) {
+    const attendance = await Attendance.findOne({ email: user.email, date: currentDate });
 
-  const lateAttendances = await Attendance.find({ markedAt: { $gte: now } });
+    if (!attendance) {
+      await sendReminderEmail(user.email);
+    }
+  }
+}
 
-  lateAttendances.forEach(attendance => {
-    const mailOptions = {
-      from: process.env.EMAIL_USERNAME,
-      to: attendance.email,
-      subject: 'Late Departure Notification',
-      text: `You marked your attendance late on ${attendance.markedAt}. Please ensure to mark it before 11:00 PM next time.`,
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending email:', error);
-      } else {
-        console.log('Email sent:', info.response);
-      }
-    });
+async function sendReminderEmail(email) {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
   });
-};
 
-export default sendLateNotification;
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Attendance Reminder',
+    text: 'Please mark your attendance before 11 PM.',
+  };
+
+  await transporter.sendMail(mailOptions);
+}

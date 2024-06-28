@@ -1,42 +1,99 @@
+// components/FaceRecognition.jsx
 'use client';
 
-import React, { useState, useRef } from 'react';
-import Webcam from 'react-webcam';
-import axios from 'axios';
-import { useSession } from 'next-auth/react';
+import * as faceapi from 'face-api.js';
+import { useEffect, useRef, useState } from 'react';
 
-export default function FaceRecognitionPage() {
-  const { data: session } = useSession();
-  const webcamRef = useRef(null);
-  const [message, setMessage] = useState('');
+const FaceRecognition = ({ onFaceMatch }) => {
+  const videoRef = useRef();
+  const [modelsLoaded, setModelsLoaded] = useState(false);
+  const [isRecognizing, setIsRecognizing] = useState(false);
 
-  const capture = async () => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    const response = await axios.post('/api/attendance/mark', { image: imageSrc, email: session.user.email });
-    if (response.data.success) {
-      setMessage('Attendance marked successfully');
-    } else {
-      setMessage('Failed to mark attendance');
+  useEffect(() => {
+    const loadModels = async () => {
+      const MODEL_URL = '/models';
+      await Promise.all([
+        faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+      ]);
+      setModelsLoaded(true);
+    };
+
+    loadModels();
+  }, []);
+
+  useEffect(() => {
+    if (modelsLoaded) {
+      startVideo();
     }
+  }, [modelsLoaded]);
+
+  const startVideo = () => {
+    navigator.mediaDevices.getUserMedia({ video: {} }).then((stream) => {
+      videoRef.current.srcObject = stream;
+    });
   };
 
-  if (!session) {
-    return <p>You need to be signed in to view this page</p>;
-  }
+  const handleVideoPlay = async () => {
+    setIsRecognizing(true);
+    const labeledDescriptors = await loadLabeledImages();
+    const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6);
+
+    const intervalId = setInterval(async () => {
+      const detections = await faceapi
+        .detectAllFaces(videoRef.current)
+        .withFaceLandmarks()
+        .withFaceDescriptors();
+
+      const resizedDetections = faceapi.resizeResults(detections, {
+        width: videoRef.current.videoWidth,
+        height: videoRef.current.videoHeight,
+      });
+
+      const results = resizedDetections.map((d) =>
+        faceMatcher.findBestMatch(d.descriptor)
+      );
+
+      if (results.some((result) => result.label !== 'unknown')) {
+        onFaceMatch();
+        clearInterval(intervalId);
+        setIsRecognizing(false);
+      }
+    }, 1000);
+  };
+
+  const loadLabeledImages = () => {
+    // Replace this with actual labeled images
+    const labels = ['User1'];
+    return Promise.all(
+      labels.map(async (label) => {
+        const descriptions = [];
+        for (let i = 1; i <= 1; i++) {
+          const img = await faceapi.fetchImage(`/labeled_images/${label}/${i}.jpg`);
+          const detections = await faceapi
+            .detectSingleFace(img)
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+          descriptions.push(detections.descriptor);
+        }
+        return new faceapi.LabeledFaceDescriptors(label, descriptions);
+      })
+    );
+  };
 
   return (
-    <div className="face-recognition">
-      <h1 className="head_text text-center">
-        <span className="blue_gradient">Face Recognition</span>
-      </h1>
-      <Webcam
-        audio={false}
-        ref={webcamRef}
-        screenshotFormat="image/jpeg"
-        className="webcam"
+    <div className="face-recognition-container">
+      <video
+        ref={videoRef}
+        onPlay={handleVideoPlay}
+        autoPlay
+        muted
+        className="face-recognition-video"
       />
-      <button onClick={capture}>Mark Attendance</button>
-      {message && <p>{message}</p>}
+      {!isRecognizing && <div className="face-recognition-overlay">Face recognition is active...</div>}
     </div>
   );
-}
+};
+
+export default FaceRecognition;

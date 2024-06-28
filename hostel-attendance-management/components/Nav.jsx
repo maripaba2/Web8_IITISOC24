@@ -27,6 +27,7 @@ const Nav = () => {
     width={80}
     height={80}
     className='institute-logo'
+    draggable={false}
   />
 </Link>
 
@@ -47,6 +48,7 @@ const Nav = () => {
                   height={60}
                   className='rounded-full'
                   alt='profile'
+                  draggable = {false}
                 />
               </Link>
             </div>

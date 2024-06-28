@@ -1,4 +1,4 @@
-'use client';  // Add this directive at the top
+'use client'; 
 
 import { useEffect } from 'react';
 import { Line, Bar } from 'react-chartjs-2';

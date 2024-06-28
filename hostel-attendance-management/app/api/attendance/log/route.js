@@ -2,14 +2,14 @@ import { connectToDB } from '../../../../utils/database';
 import Attendance from '../../../../models/Attendance';
 
 export const handler = async (req, res) => {
-  if (req.method !== 'POST') {
+  if (req.method !== 'GET') {
     console.error('Method not allowed');
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   await connectToDB();
 
-  const { email } = req.body;
+  const { email } = req.query;
 
   if (!email) {
     console.error('Email is required');
@@ -17,17 +17,10 @@ export const handler = async (req, res) => {
   }
 
   try {
-    const attendance = new Attendance({
-      email,
-      date: new Date().setHours(0, 0, 0, 0),
-      markedAt: new Date(),
-    });
-
-    await attendance.save();
-
-    return res.status(200).json({ message: 'Attendance marked' });
+    const attendanceLog = await Attendance.find({ email });
+    return res.status(200).json(attendanceLog);
   } catch (error) {
-    console.error('Error marking attendance:', error);
+    console.error('Error fetching attendance log:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };

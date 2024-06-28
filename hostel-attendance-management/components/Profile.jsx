@@ -1,32 +1,19 @@
-// app/profile/page.jsx
+// components/Profile.jsx
+'use client';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 
 export default function Profile() {
   const { data: session } = useSession();
-  const [attendanceMarked, setAttendanceMarked] = useState(false);
 
-  useEffect(() => {
-    if (session) {
-      // Fetch attendance status
-      axios.get('/api/attendance/status', { params: { email: session.user.email } })
-        .then(response => {
-          setAttendanceMarked(response.data.marked);
-        });
-    }
-  }, [session]);
-
-  const markAttendance = () => {
-    // Logic for marking attendance with face recognition
-    axios.post('/api/attendance/mark', { email: session.user.email })
-      .then(() => {
-        setAttendanceMarked(true);
-      });
-  };
 
   if (!session) {
-    return <p>You need to be signed in to view this page</p>;
+    return (
+      <div className="not-signed-in">
+        <p className='message blue_gradient'>You need to be signed in to view this page</p>
+        <button className="outline_btn" onClick={() => window.location.href = '/api/auth/signin'}>Sign in</button>
+      </div>
+    );
   }
 
   return (
@@ -37,19 +24,12 @@ export default function Profile() {
 
       <div className='profileContainer'>
         <div className='profileCard'>
-          <img src={session.user.image} alt="Profile Photo" className='profilePhoto' />
+          <img id="profile-photo" src={session.user.image} alt="Profile Photo" className='profilePhoto' draggable={false}/>
           <div className='profileDetails'>
             <h2>{session.user.name}</h2>
             <p><strong>Course:</strong>B.Tech</p>
             <p><strong>Email ID:</strong> {session.user.email}</p>
             <p><strong>Hostel:</strong>C V Raman</p>
-          </div>
-          <div className='attendanceContainer'>
-            {attendanceMarked ? (
-              <p>Your attendance has already been marked</p>
-            ) : (
-              <button onClick={markAttendance}>Mark Attendance</button>
-            )}
           </div>
         </div>
       </div>
