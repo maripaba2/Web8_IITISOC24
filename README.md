@@ -10,10 +10,8 @@ Website to accurately log hostellers arrivals and departures.Hosteller can mark 
 
     ```sh
     git clone https://github.com/maripaba2/Web8_IITISOC24.git
-    cd yourprojectname
+    cd hostel-attendance-management
     ```
-    Make sure that you are in correct directory (cd hostel-attendance-management)
-
 2. **Install dependencies:**
 
     If you're using `npm`:
