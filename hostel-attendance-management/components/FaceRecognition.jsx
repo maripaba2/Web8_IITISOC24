@@ -1,4 +1,3 @@
-// components/FaceRecognition.jsx
 'use client';
 
 import * as faceapi from 'face-api.js';
@@ -64,7 +63,6 @@ const FaceRecognition = ({ onFaceMatch }) => {
   };
 
   const loadLabeledImages = () => {
-    // Replace this with actual labeled images
     const labels = ['User1'];
     return Promise.all(
       labels.map(async (label) => {

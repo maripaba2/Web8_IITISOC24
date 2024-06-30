@@ -1,36 +1,27 @@
 import { connectToDB } from '../../../../utils/database';
 import Attendance from '../../../../models/Attendance';
+import { NextResponse } from 'next/server';
 
-export const handler = async (req, res) => {
-  if (req.method !== 'POST') {
-    console.error('Method not allowed');
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
-
-  await connectToDB();
-
-  const { email } = req.body;
+export async function POST(req) {
+  const { email } = await req.json();
 
   if (!email) {
-    console.error('Email is required');
-    return res.status(400).json({ error: 'Email is required' });
+    return NextResponse.json({ msg: ["Email is required"] }, { status: 400 });
   }
 
   try {
-    const attendance = new Attendance({
+    await connectToDB();
+    const now = new Date();
+    const newAttendance = new Attendance({
       email,
-      date: new Date().setHours(0, 0, 0, 0),
-      markedAt: new Date(),
+      date: now,
+      markedAt: now,
     });
+    await newAttendance.save();
 
-    await attendance.save();
-
-    return res.status(200).json({ message: 'Attendance marked' });
+    return NextResponse.json({ msg: ["Attendance marked successfully"] }, { status: 200 });
   } catch (error) {
     console.error('Error marking attendance:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return NextResponse.json({ msg: ["Unable to mark attendance"] }, { status: 500 });
   }
-};
-
-// Ensure the default export is used
-export default handler;
+}

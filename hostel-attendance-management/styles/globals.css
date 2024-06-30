@@ -23,11 +23,11 @@ body {
   align-items: center;
   padding: 1rem;
   width: 100%;
-  position: fixed;  /* Fixed navbar */
+  position: fixed;
   top: 0;
   left: 0;
-  z-index: 1000;  /* Ensure it stays on top */
-  background-color: transparent;  /* Semi-transparent background */
+  z-index: 1000;
+  background-color: transparent;
   transition: background-color 0.3s ease;
 }
 
@@ -112,7 +112,7 @@ body {
 }
 
 .main {
-  padding-top: 80px;  /* Adjust for fixed navbar height */
+  padding-top: 80px;
 }
 
 
@@ -555,7 +555,6 @@ button:hover {
   margin-bottom: 20px;
   animation: slideDown 1s ease-in-out;
 }
-/* styles/face_recognition.css */
 
 .face-recognition-container {
   position: relative;
@@ -563,7 +562,7 @@ button:hover {
   justify-content: center;
   align-items: center;
   background-color: transparent;
-  color: #0070f3; /* Blue color for the theme */
+  color: #0070f3;
 }
 
 .face-recognition-video {
@@ -587,7 +586,6 @@ button:hover {
   font-size: 24px;
   border-radius: 10px;
 }
-
 
 .head_text {
   @apply mt-5 text-5xl font-extrabold leading-[1.15] text-black sm:text-6xl;

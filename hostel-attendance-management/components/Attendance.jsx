@@ -6,6 +6,7 @@ export default function Attendance() {
   const { data: session } = useSession();
   const [attendanceLog, setAttendanceLog] = useState([]);
   const [attendanceMarked, setAttendanceMarked] = useState(false);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     if (session) {
@@ -21,6 +22,7 @@ export default function Attendance() {
         })
         .catch(error => {
           console.error('Error fetching attendance log:', error);
+          setMessage('Error fetching attendance log');
         });
     }
   }, [session]);
@@ -41,6 +43,7 @@ export default function Attendance() {
       })
       .then(() => {
         setAttendanceMarked(true);
+        setMessage('Attendance marked successfully');
         fetch(`/api/attendance/log?email=${session.user.email}`)
           .then(response => {
             if (!response.ok) {
@@ -53,10 +56,12 @@ export default function Attendance() {
           })
           .catch(error => {
             console.error('Error fetching attendance log:', error);
+            setMessage('Error fetching attendance log');
           });
       })
       .catch(error => {
         console.error('Error marking attendance:', error);
+        setMessage('Error marking attendance');
       });
   };
 
@@ -72,6 +77,8 @@ export default function Attendance() {
   return (
     <div className="content">
       <h1 className='blue_gradient'>Attendance Log</h1>
+      <button onClick={markAttendance} className="mark-attendance-btn">Mark Attendance</button>
+      {message && <p>{message}</p>}
       <div className="attendanceTable">
         <table>
           <thead>

@@ -1,4 +1,3 @@
-// utils/sendNotification.js
 import nodemailer from 'nodemailer';
 import connectToDatabase from './database';
 import Attendance from '../models/Attendance';

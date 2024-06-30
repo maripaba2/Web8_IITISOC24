@@ -48,15 +48,8 @@ const Dashboard = () => {
     }
   };
 
-  useEffect(() => {
-    // Any additional setup or side effects if necessary
-  }, []);
-
   return (
     <div className="dashboardContainer">
-      {/* <Link href="/">
-        <img src="/assets/icons/main-menu.png" alt="Main Menu" className="menuIcon" />
-      </Link> */}
       <div className="chartContainer">
         <h1><strong className='blue_gradient'>Attendance Dashboard</strong></h1>
         <Line data={attendanceData} options={chartOptions} />

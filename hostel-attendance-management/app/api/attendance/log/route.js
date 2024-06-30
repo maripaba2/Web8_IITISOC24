@@ -1,29 +1,21 @@
 import { connectToDB } from '../../../../utils/database';
 import Attendance from '../../../../models/Attendance';
+import { NextResponse } from 'next/server';
 
-export const handler = async (req, res) => {
-  if (req.method !== 'GET') {
-    console.error('Method not allowed');
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
-
-  await connectToDB();
-
-  const { email } = req.query;
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+  const email = searchParams.get('email');
 
   if (!email) {
-    console.error('Email is required');
-    return res.status(400).json({ error: 'Email is required' });
+    return NextResponse.json({ msg: ["Email is required"] }, { status: 400 });
   }
 
   try {
-    const attendanceLog = await Attendance.find({ email });
-    return res.status(200).json(attendanceLog);
+    await connectToDB();
+    const logs = await Attendance.find({ email }).sort({ date: -1 });
+    return NextResponse.json(logs);
   } catch (error) {
     console.error('Error fetching attendance log:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return NextResponse.json({ msg: ["Unable to fetch attendance log"] }, { status: 500 });
   }
-};
-
-// Ensure the default export is used
-export default handler;
+}
