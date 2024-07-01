@@ -2,7 +2,7 @@
 
 # Hostel Attendance Management
 
-Website to accurately log hostellers arrivals and departures.Hosteller can mark his attendace through this website and a notifcation would be sent if the hosteller is being late and an analytics dashboard to analyse his attendance trends
+Our project is a comprehensive web application designed to accurately log the arrivals and departures of hostel residents. With this website, hostellers can easily mark their attendance using a face recognition feature, ensuring a streamlined and efficient tracking system. If a hosteller is late, an automated notification will be sent to the hosteller. Additionally, the platform features an analytics dashboard that provides detailed insights into attendance trends.
 
 ## Installation
 
