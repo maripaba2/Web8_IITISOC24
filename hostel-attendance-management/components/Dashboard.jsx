@@ -1,9 +1,11 @@
-'use client'; 
+'use client';
 
-import { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
-import Link from 'next/link';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 
 const Dashboard = () => {
   const attendanceData = {
@@ -48,8 +50,34 @@ const Dashboard = () => {
     }
   };
 
+  const dashboardRef = useRef();
+  const buttonRef = useRef();
+
+  const generatePDF = () => {
+    const input = dashboardRef.current;
+    const button = buttonRef.current;
+
+    // Hide the button and the blue bar before taking the screenshot
+    button.style.display = 'none';
+    document.querySelector('.blue_gradient').style.display = 'none';
+
+    html2canvas(input).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save('attendance-report.pdf');
+
+      // Show the button and the blue bar again after the screenshot is taken
+      button.style.display = 'block';
+      document.querySelector('.blue_gradient').style.display = 'block';
+    });
+  };
+
   return (
-    <div className="dashboardContainer">
+    <div className="dashboardContainer" ref={dashboardRef}>
       <div className="chartContainer">
         <h1><strong className='blue_gradient'>Attendance Dashboard</strong></h1>
         <Line data={attendanceData} options={chartOptions} />
@@ -62,6 +90,7 @@ const Dashboard = () => {
         {/* <h2>Early Departures</h2> */}
         <Bar data={earlyDeparturesData} options={chartOptions} />
       </div>
+      <button ref={buttonRef} onClick={generatePDF} className="pdfButton">Generate PDF Report</button>
     </div>
   );
 };
