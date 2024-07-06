@@ -9,11 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@tensorflow/tfjs": "^4.20.0",
+    "@tensorflow/tfjs": "^3.11.0",
     "autoprefixer": "10.4.14",
     "axios": "^1.7.2",
     "bcrypt": "^5.1.0",
     "chart.js": "^4.4.3",
+    "child_process": "^1.0.2",
     "face-api.js": "^0.22.2",
     "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
@@ -24,6 +25,7 @@
     "next": "^14.2.4",
     "next-auth": "^4.24.7",
     "nodemailer": "^6.9.13",
+    "path": "^0.12.7",
     "postcss": "8.4.23",
     "react": "18.2.0",
     "react-chartjs-2": "^5.2.0",
