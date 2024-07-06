@@ -1,27 +1,35 @@
 import { connectToDB } from '../../../../utils/database';
 import Attendance from '../../../../models/Attendance';
-import { NextResponse } from 'next/server';
+import { sendLateArrivalNotification } from '../../../../utils/email';
 
 export async function POST(req) {
   const { email } = await req.json();
 
   if (!email) {
-    return NextResponse.json({ msg: ["Email is required"] }, { status: 400 });
+    return NextResponse.json({ error: 'Email is required' }, { status: 400 });
   }
 
-  try {
-    await connectToDB();
-    const now = new Date();
-    const newAttendance = new Attendance({
-      email,
-      date: now,
-      markedAt: now,
-    });
-    await newAttendance.save();
+  await connectToDB();
 
-    return NextResponse.json({ msg: ["Attendance marked successfully"] }, { status: 200 });
+  const currentTime = new Date();
+  const isLate = currentTime.getHours() >= 23;
+
+  try {
+    const attendance = new Attendance({
+      email,
+      date: new Date().setHours(0, 0, 0, 0),
+      markedAt: currentTime,
+    });
+
+    await attendance.save();
+
+    if (isLate) {
+      await sendLateArrivalNotification(email);
+    }
+
+    return NextResponse.json({ message: 'Attendance marked' });
   } catch (error) {
     console.error('Error marking attendance:', error);
-    return NextResponse.json({ msg: ["Unable to mark attendance"] }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
