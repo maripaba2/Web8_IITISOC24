@@ -2,7 +2,7 @@
 
 # Hostel Attendance Management
 
-Website to accurately log hostellers arrivals and departures.Hosteller can mark his attendace through this website and a notifcation would be sent if the hosteller is being late and an analytics dashboard to analyse his attendance trends
+Our project is a comprehensive web application designed to accurately log the arrivals and departures of hostel residents. With this website, hostellers can easily mark their attendance using a face recognition feature, ensuring a streamlined and efficient tracking system. If a hosteller is late, an automated notification will be sent to the hosteller. Additionally, the platform features an analytics dashboard that provides detailed insights into attendance trends.
 
 ## Installation
 
@@ -10,10 +10,13 @@ Website to accurately log hostellers arrivals and departures.Hosteller can mark 
 
     ```sh
     git clone https://github.com/maripaba2/Web8_IITISOC24.git
-    cd yourprojectname
     ```
-    Make sure that you are in correct directory (cd hostel-attendance-management)
-
+    ```sh
+    cd Web8_IITISOC24
+    ```
+    ```sh
+    cd hostel-attendance-management
+    ```
 2. **Install dependencies:**
 
     If you're using `npm`:
@@ -22,10 +25,6 @@ Website to accurately log hostellers arrivals and departures.Hosteller can mark 
     npm install 
     ```
     
-    ```sh
-    npm install next
-    ```
-
 ## Usage
 
 1. **Running the application:**
