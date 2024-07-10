@@ -583,6 +583,8 @@ button:hover {
 .pdfButton:hover {
   background-color: #107de4b7;
 }
+
+
 .head_text {
   @apply mt-5 text-5xl font-extrabold leading-[1.15] text-black sm:text-6xl;
 }

@@ -11,6 +11,9 @@ const FaceRecognition = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [descriptors, setDescriptors] = useState([]);
+  const [faceDetected, setFaceDetected] = useState(false);
+  const [detectionTimeout, setDetectionTimeout] = useState(null);
+  const [modelsLoaded, setModelsLoaded] = useState(false);
 
   const loadModels = async () => {
     const MODEL_URL = `${window.location.origin}/models`;
@@ -21,6 +24,7 @@ const FaceRecognition = () => {
       await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
       await loadReferenceImages();
       setMessage('Models loaded successfully');
+      setModelsLoaded(true);
       startVideo();
     } catch (error) {
       console.error('Error loading models:', error);
@@ -29,7 +33,7 @@ const FaceRecognition = () => {
   };
 
   const loadReferenceImages = async () => {
-    const students = ['sathwik.jpg', 'vikas.jpg', 'ganesh.jpg']; // Updated list of student image file names
+    const students = ['sathwik.jpg', 'vikas.jpg', 'ganesh.jpg', 'sudheendra.jpg']; // Updated list of student image file names
     const descriptors = [];
 
     for (const student of students) {
@@ -38,7 +42,7 @@ const FaceRecognition = () => {
       if (detections) {
         descriptors.push({
           descriptor: detections.descriptor,
-          name: student.split('.')[0] // File name is the student's name
+          name: student.split('.')[0]
         });
       }
     }
@@ -48,7 +52,12 @@ const FaceRecognition = () => {
   const startVideo = () => {
     navigator.mediaDevices.getUserMedia({ video: {} })
       .then(stream => {
-        videoRef.current.srcObject = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.onloadedmetadata = () => {
+            detectFace();
+          };
+        }
       })
       .catch(err => {
         console.error('Error accessing webcam:', err);
@@ -64,11 +73,7 @@ const FaceRecognition = () => {
   };
 
   const detectFace = async () => {
-    if (!videoRef.current) return;
-
-    if (videoRef.current.videoWidth === 0 || videoRef.current.videoHeight === 0) {
-      return;
-    }
+    if (!videoRef.current || !videoRef.current.videoWidth || !videoRef.current.videoHeight) return;
 
     const detections = await faceapi.detectAllFaces(
       videoRef.current,
@@ -82,23 +87,33 @@ const FaceRecognition = () => {
       });
 
       canvasRef.current.getContext('2d').clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-      faceapi.draw.drawDetections(canvasRef.current, resizedDetections);
 
       for (const detection of resizedDetections) {
         const bestMatch = findMatch(detection.descriptor);
         if (bestMatch && !attendanceMarked) {
-          markAttendance(session.user.email);
-          setMessage(`Attendance marked for ${bestMatch.name}`);
-        }
+          if (!faceDetected) {
+            setFaceDetected(true);
+            setMessage(`Hello ${bestMatch.name}`);
+            if (detectionTimeout) clearTimeout(detectionTimeout);
+            setDetectionTimeout(setTimeout(() => {
+              markAttendance(session.user.email);
+              setMessage(`Attendance marked for ${bestMatch.name}`);
+              setAttendanceMarked(true);
+              setTimeout(stopVideo, 1000);
+            }, 3000));
+          }
 
-        if (bestMatch) {
           const { box } = detection.detection;
           const drawBox = new faceapi.draw.DrawBox(box, { label: bestMatch.name });
           drawBox.draw(canvasRef.current);
         }
       }
     } else {
-      setMessage('No face detected');
+      if (faceDetected) {
+        setFaceDetected(false);
+        setMessage('No face detected');
+        if (detectionTimeout) clearTimeout(detectionTimeout);
+      }
     }
   };
 
@@ -111,7 +126,7 @@ const FaceRecognition = () => {
         bestMatch = { ...reference, distance };
       }
     }
-    return bestMatch.distance < 0.6 ? bestMatch : null; // Threshold for a match
+    return bestMatch.distance < 0.6 ? bestMatch : null;
   };
 
   const markAttendance = async (email) => {
@@ -139,13 +154,31 @@ const FaceRecognition = () => {
 
   useEffect(() => {
     if (session) {
-      loadModels();
-      const intervalId = setInterval(detectFace, 1000);
+      const checkAttendance = async () => {
+        try {
+          const response = await fetch(`/api/attendance/log?email=${session.user.email}`);
+          const data = await response.json();
+          const lastAttendance = new Date(data.lastAttendance);
+          const now = new Date();
+          const hoursDifference = Math.abs(now - lastAttendance) / 36e5;
 
-      return () => {
-        clearInterval(intervalId);
-        stopVideo();
+          if (hoursDifference < 24) {
+            setAttendanceMarked(true);
+            setMessage('YOUR ATTENDANCE HAS ALREADY BEEN MARKED');
+          } else {
+            loadModels();
+            const intervalId = setInterval(detectFace, 500);
+
+            return () => {
+              clearInterval(intervalId);
+              stopVideo();
+            };
+          }
+        } catch (error) {
+          console.error('Error fetching attendance log:', error);
+        }
       };
+      checkAttendance();
     }
   }, [session]);
 
@@ -165,6 +198,15 @@ const FaceRecognition = () => {
     );
   }
 
+  if (attendanceMarked) {
+    return (
+      <div style={{ textAlign: 'center', padding: '20px' }}>
+        <h1 style={{ color: '#1f8ef1' }}>YOUR ATTENDANCE HAS ALREADY BEEN MARKED</h1>
+        <button onClick={() => window.location.href = '/attendance'} style={{ marginTop: '20px', padding: '10px 20px', borderRadius: '5px', backgroundColor: '#1f8ef1', color: '#fff', border: 'none' }}>View Log</button>
+      </div>
+    );
+  }
+
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
       <h1 style={{ color: '#1f8ef1' }}>Face Recognition Attendance</h1>
@@ -172,7 +214,7 @@ const FaceRecognition = () => {
         <video ref={videoRef} autoPlay muted style={{ width: '60%', borderRadius: '10px', marginBottom: '20px' }}></video>
         <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }}></canvas>
       </div>
-      <p>{message}</p>
+      <p className="message">{message}</p>
     </div>
   );
 };
