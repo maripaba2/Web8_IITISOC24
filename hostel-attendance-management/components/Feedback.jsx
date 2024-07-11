@@ -34,6 +34,11 @@ export default function Feedback() {
 
       if (response.ok) {
         setMessage(data.msg[0]);
+        setFormData({
+          name: '',
+          email: '',
+          feedback: ''
+        });
       } else {
         setMessage(data.msg.join(', '));
       }

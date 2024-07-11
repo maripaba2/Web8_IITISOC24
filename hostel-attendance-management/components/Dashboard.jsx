@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { useSession } from 'next-auth/react';
 import { Line, Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import jsPDF from 'jspdf';
@@ -8,38 +9,85 @@ import 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 
 const Dashboard = () => {
-  const attendanceData = {
-    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-    datasets: [{
-      label: 'Attendance',
-      data: [75, 80, 78, 85],
-      backgroundColor: 'rgba(54, 162, 235, 0.2)',
-      borderColor: 'rgba(54, 162, 235, 1)',
-      borderWidth: 1
-    }]
-  };
+  const { data: session } = useSession();
+  const [attendanceData, setAttendanceData] = useState(null);
+  const [lateArrivalsData, setLateArrivalsData] = useState(null);
+  const [earlyDeparturesData, setEarlyDeparturesData] = useState(null);
+  const dashboardRef = useRef();
+  const buttonRef = useRef();
 
-  const lateArrivalsData = {
-    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-    datasets: [{
-      label: 'Late Arrivals',
-      data: [5, 7, 3, 4],
-      backgroundColor: 'rgba(255, 99, 132, 0.2)',
-      borderColor: 'rgba(255, 99, 132, 1)',
-      borderWidth: 1
-    }]
-  };
+  useEffect(() => {
+    if (session) {
+      const fetchAttendanceData = async () => {
+        try {
+          const response = await fetch(`/api/attendance/log?email=${session.user.email}`);
+          const logs = await response.json();
+          processData(logs);
+        } catch (error) {
+          console.error('Error fetching attendance data:', error);
+        }
+      };
 
-  const earlyDeparturesData = {
-    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-    datasets: [{
-      label: 'Early Departures',
-      data: [2, 3, 4, 1],
-      backgroundColor: 'rgba(255, 206, 86, 0.2)',
-      borderColor: 'rgba(255, 206, 86, 1)',
-      borderWidth: 1
-    }]
-  };
+      const processData = (logs) => {
+        const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+        const attendance = [0, 0, 0, 0];
+        const lateArrivals = [0, 0, 0, 0];
+        const earlyDepartures = [0, 0, 0, 0];
+
+        logs.forEach(log => {
+          const logDate = new Date(log.date);
+          const weekIndex = Math.floor(logDate.getDate() / 7);
+          const markedAt = new Date(log.markedAt);
+          const markedHour = markedAt.getHours();
+
+          if (markedHour > 9) {
+            lateArrivals[weekIndex]++;
+          }
+
+          if (markedHour < 17) {
+            earlyDepartures[weekIndex]++;
+          }
+
+          attendance[weekIndex]++;
+        });
+
+        setAttendanceData({
+          labels: weeks,
+          datasets: [{
+            label: 'Attendance',
+            data: attendance,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }]
+        });
+
+        setLateArrivalsData({
+          labels: weeks,
+          datasets: [{
+            label: 'Late Arrivals',
+            data: lateArrivals,
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+          }]
+        });
+
+        setEarlyDeparturesData({
+          labels: weeks,
+          datasets: [{
+            label: 'Early Departures',
+            data: earlyDepartures,
+            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 1
+          }]
+        });
+      };
+
+      fetchAttendanceData();
+    }
+  }, [session]);
 
   const chartOptions = {
     responsive: true,
@@ -50,14 +98,10 @@ const Dashboard = () => {
     }
   };
 
-  const dashboardRef = useRef();
-  const buttonRef = useRef();
-
   const generatePDF = () => {
     const input = dashboardRef.current;
     const button = buttonRef.current;
 
-    // Hide the button and the blue bar before taking the screenshot
     button.style.display = 'none';
     document.querySelector('.blue_gradient').style.display = 'none';
 
@@ -70,11 +114,14 @@ const Dashboard = () => {
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save('attendance-report.pdf');
 
-      // Show the button and the blue bar again after the screenshot is taken
       button.style.display = 'block';
       document.querySelector('.blue_gradient').style.display = 'block';
     });
   };
+
+  if (!attendanceData || !lateArrivalsData || !earlyDeparturesData) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="dashboardContainer" ref={dashboardRef}>
@@ -83,11 +130,9 @@ const Dashboard = () => {
         <Line data={attendanceData} options={chartOptions} />
       </div>
       <div className="chartContainer">
-        {/* <h2>Late Arrivals</h2> */}
         <Bar data={lateArrivalsData} options={chartOptions} />
       </div>
       <div className="chartContainer">
-        {/* <h2>Early Departures</h2> */}
         <Bar data={earlyDeparturesData} options={chartOptions} />
       </div>
       <button ref={buttonRef} onClick={generatePDF} className="pdfButton">Generate PDF Report</button>
