@@ -179,7 +179,7 @@ const FaceRecognition = () => {
           const now = new Date();
           const hoursDifference = Math.abs(now - lastAttendance) / 36e5;
 
-          if (hoursDifference < 24) {
+          if (hoursDifference > 1) {
             setAttendanceMarked(true);
             setMessage('YOUR ATTENDANCE HAS ALREADY BEEN MARKED');
           } else {

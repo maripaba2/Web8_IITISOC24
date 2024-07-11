@@ -40,11 +40,11 @@ const Dashboard = () => {
           const markedAt = new Date(log.markedAt);
           const markedHour = markedAt.getHours();
 
-          if (markedHour > 9) {
+          if (markedHour > 23) {
             lateArrivals[weekIndex]++;
           }
 
-          if (markedHour < 17) {
+          if (markedHour < 7) {
             earlyDepartures[weekIndex]++;
           }
 
@@ -127,7 +127,7 @@ const Dashboard = () => {
     <div className="dashboardContainer" ref={dashboardRef}>
       <div className="chartContainer">
         <h1><strong className='blue_gradient'>Attendance Dashboard</strong></h1>
-        <Line data={attendanceData} options={chartOptions} />
+        <Bar data={attendanceData} options={chartOptions} />
       </div>
       <div className="chartContainer">
         <Bar data={lateArrivalsData} options={chartOptions} />
