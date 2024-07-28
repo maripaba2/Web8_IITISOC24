@@ -101,7 +101,7 @@ const FaceRecognition = () => {
                 markAttendance(session.user.email);
                 setMessage(`Attendance marked for ${bestMatch.name}`);
                 setAttendanceMarked(true);
-                setTimeout(stopAndRestartVideo, 1000); // Stop and restart video after marking attendance
+                setTimeout(stopAndRestartVideo, 1000);
               }, 3000));
             }
 
@@ -159,7 +159,7 @@ const FaceRecognition = () => {
 
     const stopAndRestartVideo = () => {
       stopVideo();
-      setTimeout(startVideo, 1000); // Restart video after 1 second
+      setTimeout(startVideo, 1000);
     };
 
     const handleVisibilityChange = () => {
@@ -208,30 +208,37 @@ const FaceRecognition = () => {
 
   if (!session) {
     return (
-      <div>
-        <p>Please sign in to mark your attendance.</p>
+      <div className="not-signed-in">
+        <p className="message blue_gradient">You need to be signed in to view this page</p>
+        <button className="outline_btn" onClick={() => window.location.href = '/api/auth/signin'}>Sign in</button>
       </div>
     );
   }
 
   if (attendanceMarked) {
     return (
-      <div style={{ textAlign: 'center', padding: '20px' }}>
-        <h1 style={{ color: '#1f8ef1' }}>YOUR ATTENDANCE HAS ALREADY BEEN MARKED</h1>
-        <button onClick={() => window.location.href = '/attendance'} style={{ marginTop: '20px', padding: '10px 20px', borderRadius: '5px', backgroundColor: '#1f8ef1', color: '#fff', border: 'none' }}>View Log</button>
+      <div className="attendance-marked">
+        <h1 className="blue_gradient">YOUR ATTENDANCE HAS ALREADY BEEN MARKED</h1>
+        <button onClick={() => window.location.href = '/attendance'} className="outline_btn">View Log</button>
       </div>
     );
   }
 
   return (
-    <div style={{ textAlign: 'center', padding: '20px' }}>
-      <h1 style={{ color: '#1f8ef1' }}>Face Recognition Attendance</h1>
-      <div style={{ position: 'relative', display: 'inline-block' }}>
-        <video ref={videoRef} autoPlay muted style={{ width: '60%', borderRadius: '10px', marginBottom: '20px' }}></video>
-        <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }}></canvas>
+    <section className="w-full">
+      <h1 className="head_text text-center">
+        <span className="blue_gradient">Face Recognition Attendance</span>
+      </h1>
+      <div className="faceRecognitionContainer">
+        <div className="faceRecognitionCard">
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <video ref={videoRef} autoPlay muted className="video"></video>
+            <canvas ref={canvasRef} className="canvas"></canvas>
+          </div>
+          <p className="message">{message}</p>
+        </div>
       </div>
-      <p className="message">{message}</p>
-    </div>
+    </section>
   );
 };
 

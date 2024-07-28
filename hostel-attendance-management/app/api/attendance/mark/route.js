@@ -1,6 +1,5 @@
 import { connectToDB } from '../../../../utils/database';
 import Attendance from '../../../../models/Attendance';
-import { sendLateArrivalNotification } from '../../../../utils/email';
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {
@@ -13,13 +12,12 @@ export async function POST(req) {
   await connectToDB();
 
   const currentTime = new Date();
-  const startOfDay = new Date().setHours(0, 0, 0, 0);
+  const startOfDay = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate());
 
   try {
-    // Check if attendance already marked today
     const existingAttendance = await Attendance.findOne({
       email,
-      date: startOfDay
+      date: startOfDay,
     });
 
     if (existingAttendance) {
@@ -36,13 +34,8 @@ export async function POST(req) {
 
     await attendance.save();
 
-    if (isLate) {
-      await sendLateArrivalNotification(email);
-    }
-
-    return NextResponse.json({ message: 'Attendance marked' });
   } catch (error) {
     console.error('Error marking attendance:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
   }
 }

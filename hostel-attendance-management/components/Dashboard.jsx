@@ -40,11 +40,11 @@ const Dashboard = () => {
           const markedAt = new Date(log.markedAt);
           const markedHour = markedAt.getHours();
 
-          if (markedHour > 23) {
+          if (markedHour >= 23 || markedHour < 7) {
             lateArrivals[weekIndex]++;
           }
 
-          if (markedHour < 7) {
+          if (markedHour > 7 && markedHour < 9) {
             earlyDepartures[weekIndex]++;
           }
 
